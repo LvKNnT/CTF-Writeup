@@ -1,0 +1,12 @@
+[package]
+name = "f1-hybrid"
+version = "0.1.0"
+edition = "2021"
+
+[[bin]]
+name = "chall"
+path = "src/main.rs"
+
+[dependencies]
+hex = "0.4"
+rand = "0.8"
