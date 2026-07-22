@@ -1,4 +1,4 @@
-# HCMUS-CTF 2026
+# FINAL HCMUS-CTF 2026
 
 Đầu tiên thì rất vui vì cuối cùng năm nay cũng đã được thực sự tham gia Chung kết HCMUS-CTF. Năm ngoái team mình vẫn qualify bảng dưới nhma 1 thành viên quan trọng trong team lại bận nên ko có cơ hội tham gia vòng Chung kết :sob:. Năm nay tham gia thì team mình mạnh hơn nên tâm lí cũng thoải mái hơn chút. 
 
@@ -114,7 +114,7 @@ python f1_solve.py <host> <port>
 
 # Funny Helicopter Morphology – 3
 
-> Helicopter Helicopter :musical_note: 
+> :helicopter: :helicopter: :helicopter: 
 
 ## Chall
 
