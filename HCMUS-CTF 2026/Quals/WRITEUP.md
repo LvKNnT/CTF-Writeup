@@ -44,7 +44,7 @@ Biết `p` rồi thì biết luôn `mod = p^4`. Hai điểm bất kỳ cho hệ 
 
 ### Formal group log kiểu p-adic (đây mới là chốt bài)
 
-Reduce `E` xuống mod `p` được 1 curve "ordinary" thường trên `GF(p)` với order `N`. Điều thú vị: với **bất kỳ** điểm `R` nào trên `E` (mod `p^4`), điểm `N*R` sẽ reduce về identity mod `p` — tức là nó rơi vào **formal group**, kernel của phép reduction. Formal group này đẳng cấu (qua 1 log map p-adic khá kinh điển) với nhóm **cộng** `Z/p^3Z`. Nghĩa là: nhân điểm trên curve ⟺ nhân log trong `Z/p^3Z`.
+Reduce `E` xuống mod `p` được 1 curve "ordinary" thường trên `GF(p)` với order `N`. Điều thú vị: với **bất kỳ** điểm `R` nào trên `E` (mod `p^4`), điểm `N*R` sẽ reduce về identity mod `p` - tức là nó rơi vào **formal group**, kernel của phép reduction. Formal group này đẳng cấu (qua 1 log map p-adic khá kinh điển) với nhóm **cộng** `Z/p^3Z`. Nghĩa là: nhân điểm trên curve ⟺ nhân log trong `Z/p^3Z`.
 
 ```python
 P2 = P1 * (N - 1)
@@ -58,11 +58,11 @@ Vì log map là đẳng cấu nhóm nên:
 z_list[j] = log(R_j) = sum_k c_j[k] * log(Q_k)   (mod p^3)
 ```
 
-— y hệt hệ 24 ẩn ban đầu, nhưng giờ là **đại số tuyến tính thật sự** trên `Z/p^3Z` thay vì cộng điểm trên curve.
+- y hệt hệ 24 ẩn ban đầu, nhưng giờ là **đại số tuyến tính thật sự** trên `Z/p^3Z` thay vì cộng điểm trên curve.
 
 ### LLL tìm nullspace, MILP dựng lại ma trận byte
 
-`z_list` có 120 số, mỗi số là tổ hợp tuyến tính nguyên (hệ số 0-255) của 24 ẩn `log(Q_k)`. Nhét vào lattice với hằng số scale lớn rồi LLL, các vector ngắn còn lại (`row[120]==0`) chính là các quan hệ null giữa các sample — 24 chiều nullspace của ma trận hệ số 120x24:
+`z_list` có 120 số, mỗi số là tổ hợp tuyến tính nguyên (hệ số 0-255) của 24 ẩn `log(Q_k)`. Nhét vào lattice với hằng số scale lớn rồi LLL, các vector ngắn còn lại (`row[120]==0`) chính là các quan hệ null giữa các sample - 24 chiều nullspace của ma trận hệ số 120x24:
 
 ```python
 K = 2**1000
@@ -80,13 +80,13 @@ p_milp.set_objective(sum(random.randint(-100,100)*x[j] for j in active))
 
 ### Ghép lại thành `sum(Q)`
 
-Có 24 cột của `C` rồi thì tìm tổ hợp hữu tỉ `x_sol` sao cho `C_T . x_sol = [1]*24` — đúng là tổ hợp sample nào mà tổng hệ số trên mỗi `Q_k` bằng 1:
+Có 24 cột của `C` rồi thì tìm tổ hợp hữu tỉ `x_sol` sao cho `C_T . x_sol = [1]*24` - đúng là tổ hợp sample nào mà tổng hệ số trên mỗi `Q_k` bằng 1:
 
 ```python
 x_sol = matrix(QQ, columns_of_C).solve_right(vector(QQ,[1]*24))
 ```
 
-Scale `x_sol` ra mẫu số chung `D`, cộng điểm thật (point addition, không phải log nữa — log chỉ để tìm hệ số) trên các `R_j` tương ứng ra `D * sum(Q)`, nhân nghịch đảo `D^-1 mod (N*p^3)` là ra đúng `sum(Q)` → key AES → decrypt flag.
+Scale `x_sol` ra mẫu số chung `D`, cộng điểm thật (point addition, không phải log nữa - log chỉ để tìm hệ số) trên các `R_j` tương ứng ra `D * sum(Q)`, nhân nghịch đảo `D^-1 mod (N*p^3)` là ra đúng `sum(Q)` → key AES → decrypt flag.
 
 ## Script
 
@@ -118,7 +118,7 @@ iso = E.isogeny(E(0, 0))
 j_iso = iso.codomain().j_invariant()
 ```
 
-`p, q` bí mật, nhưng key AES chỉ phụ thuộc `p+q` — không cần tách riêng `p, q` làm gì, chỉ cần ra được tổng.
+`p, q` bí mật, nhưng key AES chỉ phụ thuộc `p+q` - không cần tách riêng `p, q` làm gì, chỉ cần ra được tổng.
 
 ## Solve
 
@@ -129,7 +129,7 @@ a' = -2a
 b' = a^2 - 4b = (q-p)^2 + 4pq = (p+q)^2
 ```
 
-Đặt `s = p+q`. Cả `a', b'` (và mọi hàm chẵn theo `a'`, trong đó có j-invariant) đều chỉ phụ thuộc `s` và `N=pq` — dấu của `q-p` bị triệt tiêu hết. Thay công thức j-invariant vào, quy đồng mẫu số ra được 1 **cubic theo `S = s^2`**:
+Đặt `s = p+q`. Cả `a', b'` (và mọi hàm chẵn theo `a'`, trong đó có j-invariant) đều chỉ phụ thuộc `s` và `N=pq` - dấu của `q-p` bị triệt tiêu hết. Thay công thức j-invariant vào, quy đồng mẫu số ra được 1 **cubic theo `S = s^2`**:
 
 ```python
 Fp = GF(P); R.<S> = PolynomialRing(Fp)
@@ -188,13 +188,13 @@ RHS := S0 - C*S1          (mod Q, tính được hết)
 RHS === K0 - C*K1          (mod Q)   <- cả 2 vế đều BÉ!
 ```
 
-`C, RHS` biết hết, `K0, K1` bé (Gaussian sigma=2) — bài toán small-error/CVP kinh điển, y hệt trick "cancellation relation" bên bài 2, chỉ áp lên tầng error thay vì tầng ternary sample.
+`C, RHS` biết hết, `K0, K1` bé (Gaussian sigma=2) - bài toán small-error/CVP kinh điển, y hệt trick "cancellation relation" bên bài 2, chỉ áp lên tầng error thay vì tầng ternary sample.
 
 ### CVP bằng LLL + Babai
 
 Dựng lattice 16 chiều từ `q*I_8` và ma trận convolution của `C`, LLL rồi Babai nearest-plane nhắm target `(-RHS, 0)` ra 1 candidate `(K0, K1)`.
 
-**Đây là chỗ mình gặp vấn đề khi build lại từ đầu.** Validate offline (`local_verify_lattice.py`, dùng instance giả lập biết trước đáp án thật) cho thấy lattice sau khi reduce có **8 vector độc lập norm cực nhỏ** (~sqrt(12)) gần như không liên quan gì tới target — do `B0, B1` đều ternary/sparse nên `C = B0*B1^-1` "không generic" như 1 ma trận random mod Q bình thường. Cụ thể:
+**Đây là chỗ mình gặp vấn đề khi build lại từ đầu.** Validate offline (`local_verify_lattice.py`, dùng instance giả lập biết trước đáp án thật) cho thấy lattice sau khi reduce có **8 vector độc lập norm cực nhỏ** (~sqrt(12)) gần như không liên quan gì tới target - do `B0, B1` đều ternary/sparse nên `C = B0*B1^-1` "không generic" như 1 ma trận random mod Q bình thường. Cụ thể:
 
 ```text
 [*] 8 short basis vectors quanh điểm Babai.
@@ -203,7 +203,7 @@ Dựng lattice 16 chiều từ `q*I_8` và ma trận convolution của `C`, LLL 
 [+] Đáp án thật NẰM TRONG các candidate đã lọc: True
 ```
 
-`(K0,K1)` thật **có** trong pool candidate (tổ hợp điểm Babai với tổ hợp nguyên nhỏ của 8 vector kernel ngắn) — nhưng chỉ filter "sorted + đúng range" thôi thì không đủ chọn duy nhất 1 trong hàng nghìn candidate giống nhau. Cái này khớp gần như y hệt writeup gốc: `CHALLENGE` leak miễn phí 2 hệ số đầu của combined error (`K0[0], K0[1]` chính xác), và writeup gốc còn nói thẳng là phải "intersect nhiều live transcript" mới ra được flag ổn định — tức bản thân solve gốc cũng noisy y vậy, không phải determin 1 phát.
+`(K0,K1)` thật **có** trong pool candidate (tổ hợp điểm Babai với tổ hợp nguyên nhỏ của 8 vector kernel ngắn) - nhưng chỉ filter "sorted + đúng range" thôi thì không đủ chọn duy nhất 1 trong hàng nghìn candidate giống nhau. Cái này khớp gần như y hệt writeup gốc: `CHALLENGE` leak miễn phí 2 hệ số đầu của combined error (`K0[0], K0[1]` chính xác), và writeup gốc còn nói thẳng là phải "intersect nhiều live transcript" mới ra được flag ổn định - tức bản thân solve gốc cũng noisy y vậy, không phải determin 1 phát.
 
 ### Ra `T` và decrypt
 
@@ -215,7 +215,7 @@ key_bytes = little_endian(signed(T))
 flag_body = enc_bytes XOR key_bytes (lặp)
 ```
 
-lọc candidate xuống còn những cái decode ra toàn ASCII in được (filter cực mạnh — candidate sai thì byte gần như random, xác suất 32+ byte liên tiếp in được là gần bằng 0) là ra đúng flag.
+lọc candidate xuống còn những cái decode ra toàn ASCII in được (filter cực mạnh - candidate sai thì byte gần như random, xác suất 32+ byte liên tiếp in được là gần bằng 0) là ra đúng flag.
 
 ## Script
 
@@ -225,7 +225,7 @@ lọc candidate xuống còn những cái decode ra toàn ASCII in được (fil
 sage solve.sage
 ```
 
-[local_verify_lattice.py](Funny%20Helicopter%20Morphology%20-%201/local_verify_lattice.py): check offline (pure Python, không cần Sage) với instance giả lập biết đáp án thật — dùng để confirm phần đại số/lattice độc lập với server live, và cũng là script tái hiện lại phát hiện "ambiguity" ở trên.
+[local_verify_lattice.py](Funny%20Helicopter%20Morphology%20-%201/local_verify_lattice.py): check offline (pure Python, không cần Sage) với instance giả lập biết đáp án thật - dùng để confirm phần đại số/lattice độc lập với server live, và cũng là script tái hiện lại phát hiện "ambiguity" ở trên.
 
 ```bash
 python local_verify_lattice.py
@@ -282,7 +282,7 @@ Viết `S = S_mod_r + r*X` với `X` nguyên chưa biết, mỗi sample cho 16 p
 V_i = (C0_i - M_i * S_mod_r_lifted) / R      # ~= M_i*X + e_i nhỏ
 ```
 
-Với 10 sample (160 phương trình, 16 ẩn) — dư thừa nhiều — giải least squares trung bình hoá nhiễu Gaussian ra, round là ra `X` chính xác, tức là ra `S` nguyên chính xác:
+Với 10 sample (160 phương trình, 16 ẩn) - dư thừa nhiều - giải least squares trung bình hoá nhiễu Gaussian ra, round là ra `X` chính xác, tức là ra `S` nguyên chính xác:
 
 ```python
 X_exact = round(least_squares(M_stack, V_stack))
@@ -291,7 +291,7 @@ S_exact = S_mod_r_lifted + R * X_exact
 
 ### Lattice ACDP ra `B0, B1`
 
-`S` tách thành `S0 = B0*T+K0`, `S1 = B1*T+K1` (8 hệ số mỗi cái). `B0, B1` ternary (bé), `K0, K1` Gaussian (bé), nên `B0*S1 - B1*S0 = B0*K1 - B1*K0` cũng **bé** — bài toán ACDP kinh điển. Dựng lattice rồi LLL, `(B0,B1)` xuất hiện thẳng làm vector ngắn nhất:
+`S` tách thành `S0 = B0*T+K0`, `S1 = B1*T+K1` (8 hệ số mỗi cái). `B0, B1` ternary (bé), `K0, K1` Gaussian (bé), nên `B0*S1 - B1*S0 = B0*K1 - B1*K0` cũng **bé** - bài toán ACDP kinh điển. Dựng lattice rồi LLL, `(B0,B1)` xuất hiện thẳng làm vector ngắn nhất:
 
 ```python
 L[i,i]=1; L[i,16+j]=M_S1_row[i,j]
@@ -301,7 +301,7 @@ B0, B1 = L.LLL()[0][:8], L.LLL()[0][8:16]
 
 ### Giải ra `T`
 
-Biết `B0` rồi thì `S0=B0*T+K0` chỉ còn nhiễu `K0` bé xíu — giải hệ tuyến tính (rational) rồi round ra `T` luôn:
+Biết `B0` rồi thì `S0=B0*T+K0` chỉ còn nhiễu `K0` bé xíu - giải hệ tuyến tính (rational) rồi round ra `T` luôn:
 
 ```python
 T = [round(x) for x in M_B0_col.solve_right(vector(QQ, S0))]
@@ -323,7 +323,7 @@ flag = bytes(b ^ key_bytes[i % 64] for i, b in enumerate(enc_bytes))
 sage solve.sage
 ```
 
-Kết quả 1 run có thể lệch 1 chút do rounding/sign biên (hiếm), nên chạy lại vài connection rồi so prefix — chỉ khác đoạn padding random cuối, còn lại giống hệt nhau:
+Kết quả 1 run có thể lệch 1 chút do rounding/sign biên (hiếm), nên chạy lại vài connection rồi so prefix - chỉ khác đoạn padding random cuối, còn lại giống hệt nhau:
 
 ```text
 l4ttice?-w1th-what-ortho-l4tt1c3-or-idea-1ng4n134-an4th3r-dm!bb9
@@ -350,7 +350,7 @@ fn encrypt_block(block, rounds, sboxes) {
 
 ### Oracle chính là 1 luỹ thừa của round function
 
-Gọi `S` là lớp S-box, `P` là permute public. `encrypt_block` áp `S,P,S,P,...,S` — 12 lần `S`, 11 lần `P`. Đặt `F := P∘S` (1 "vòng key" đầy đủ):
+Gọi `S` là lớp S-box, `P` là permute public. `encrypt_block` áp `S,P,S,P,...,S` - 12 lần `S`, 11 lần `P`. Đặt `F := P∘S` (1 "vòng key" đầy đủ):
 
 ```
 E(x) = S(F^11(x))     # oracle trả về cái này
@@ -366,11 +366,11 @@ G(x) := P(E(x)) = F(F^11(x)) = F^12(x)
 
 ### Không gian candidate bé cho `F` tại 1 state chọn sẵn
 
-Chọn state `x_a` mà **mọi** nibble đều = `a` (0-15). Vì `sbox_layer` tra `sboxes[i%4]` theo từng nibble, `S(x_a)` (và `F(x_a)=P(S(x_a))`) chỉ phụ thuộc **4** ẩn: `(S0(a),S1(a),S2(a),S3(a))`, mỗi cái 0..15 — `16^4=65536` candidate, không phải `16!^4`.
+Chọn state `x_a` mà **mọi** nibble đều = `a` (0-15). Vì `sbox_layer` tra `sboxes[i%4]` theo từng nibble, `S(x_a)` (và `F(x_a)=P(S(x_a))`) chỉ phụ thuộc **4** ẩn: `(S0(a),S1(a),S2(a),S3(a))`, mỗi cái 0..15 - `16^4=65536` candidate, không phải `16!^4`.
 
 ### Lọc candidate bằng quan hệ commute
 
-Với `y = F(x_a)` thật, `G^k(y) = F(G^k(x_a))` mọi `k`. `G^k(x_a)` đo được **chính xác** (không đoán — `x_a` tự chọn, hỏi oracle lặp lại được). Với 1 candidate `y`, check `G^k(y)` có "consistent" với `F(G^k(x_a))` không mà không cần biết `F` đầy đủ: undo `P` trên `G^k(y)` ra candidate output của `S` tại input biết trước `G^k(x_a)`, rồi check tính chất bắt buộc của `S`: input nibble giống nhau (cùng loại S-box) thì output giống nhau, input khác nhau thì output khác nhau (S-box là song ánh):
+Với `y = F(x_a)` thật, `G^k(y) = F(G^k(x_a))` mọi `k`. `G^k(x_a)` đo được **chính xác** (không đoán - `x_a` tự chọn, hỏi oracle lặp lại được). Với 1 candidate `y`, check `G^k(y)` có "consistent" với `F(G^k(x_a))` không mà không cần biết `F` đầy đủ: undo `P` trên `G^k(y)` ra candidate output của `S` tại input biết trước `G^k(x_a)`, rồi check tính chất bắt buộc của `S`: input nibble giống nhau (cùng loại S-box) thì output giống nhau, input khác nhau thì output khác nhau (S-box là song ánh):
 
 ```python
 def consistent(input_nibbles, output_nibbles):
@@ -387,11 +387,11 @@ def consistent(input_nibbles, output_nibbles):
     return True
 ```
 
-Candidate sai bị loại gần như ngay lập tức — guess sai cho output nibble gần như random, xác suất thoả structure "same-in-same-out, distinct-in-distinct-out" trên 16 vị trí là cực thấp.
+Candidate sai bị loại gần như ngay lập tức - guess sai cho output nibble gần như random, xác suất thoả structure "same-in-same-out, distinct-in-distinct-out" trên 16 vị trí là cực thấp.
 
 ### Batch 1 lần, dùng lại cho cả 16 giá trị `a`
 
-`16^4` candidate và ảnh `G^k` của chúng **không phụ thuộc `a`** — chỉ chain thật `G^k(x_a)` mới phụ thuộc. Nên batch toàn bộ (`G^1(y)..G^k(y)` cho cả 65536 candidate) tính **1 lần**, dùng lại cho cả 16 giá trị `a`, pipeline query `E` qua connection cho nhanh. Implementation này dừng mở rộng round cho `a` nào đã còn 1 candidate — validate offline (`local_verify_commute.py`) thấy thường resolve hết 16 giá trị trong 4 round:
+`16^4` candidate và ảnh `G^k` của chúng **không phụ thuộc `a`** - chỉ chain thật `G^k(x_a)` mới phụ thuộc. Nên batch toàn bộ (`G^1(y)..G^k(y)` cho cả 65536 candidate) tính **1 lần**, dùng lại cho cả 16 giá trị `a`, pipeline query `E` qua connection cho nhanh. Implementation này dừng mở rộng round cho `a` nào đã còn 1 candidate - validate offline (`local_verify_commute.py`) thấy thường resolve hết 16 giá trị trong 4 round:
 
 ```text
 round 1: resolved so far = 0/16
@@ -413,7 +413,7 @@ Check vài query oracle tươi so với local encryption cho chắc, rồi gửi
 sage solve.sage --host chall.blackpinker.com --port 20280 --powers 8 --chunk-blocks 8192
 ```
 
-[local_verify_commute.py](Rust%20In%20Peace/rust-in-peace/local_verify_commute.py): check offline không cần mạng — dựng cipher giả trong process với S-box random biết trước, chạy đúng thuật toán `recover_sboxes`, confirm khớp và test thêm 200 block random.
+[local_verify_commute.py](Rust%20In%20Peace/rust-in-peace/local_verify_commute.py): check offline không cần mạng - dựng cipher giả trong process với S-box random biết trước, chạy đúng thuật toán `recover_sboxes`, confirm khớp và test thêm 200 block random.
 
 ```bash
 python local_verify_commute.py
