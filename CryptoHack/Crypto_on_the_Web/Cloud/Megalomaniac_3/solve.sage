@@ -1,0 +1,151 @@
+from pwn import *
+from Crypto.Util.number import long_to_bytes, bytes_to_long, inverse
+import json
+import math
+
+# ==========================================
+# CONFIGURATION
+# ==========================================
+HOST = 'socket.cryptohack.org' # Change this
+PORT = 13410
+# ==========================================
+
+def get_process():
+    return remote(HOST, PORT)
+
+def get_component_length(num):
+    # Matches the server's logic: 2 bytes length + data
+    raw_bytes = long_to_bytes(num)
+    return 2 + len(raw_bytes)
+
+def solve():
+    io = get_process()
+
+    # 1. Receive Crypto Material
+    print("[*] Receiving crypto material...")
+    io.recvuntil(b"New client is uploading crypto material...\n")
+    material = json.loads(io.recvline().strip())
+    
+    io.recvuntil(b"New client is uploading a file...\n")
+    file_data = json.loads(io.recvline().strip())
+    
+    io.recvuntil(b"share_key...\n")
+    recovered_key = json.loads(io.recvline().strip())
+
+    # 2. Reconstruct RSA Parameters
+    N = recovered_key['share_key'][0]
+    e = recovered_key['share_key'][1]
+    p = recovered_key['share_key'][2]
+    q = N // p
+    d = inverse(e, (p - 1) * (q - 1))
+    u = inverse(p, q)
+    
+    print(f"[+] Recovered u: {u}")
+
+    SK_ENC = bytes.fromhex(material['share_key_enc'])
+    MASTER_KEY_ENC = material['master_key_enc']
+    NODE_KEY_ENC = bytes.fromhex(file_data['node_key_enc'])
+    FILE_ENC = bytes.fromhex(file_data['file_enc'])
+
+    # 3. Calculate LEN_PADDING (Dynamic)
+    # We must find the safe injection point relative to the start of 'u' data
+    len_p = get_component_length(p)
+    len_q = get_component_length(q)
+    len_d = get_component_length(d)
+    
+    # Global offset where 'u' (Header + Data) begins
+    u_start_offset = len_p + len_q + len_d
+    
+    # Global offset where 'u' DATA begins (skip 2 bytes length header)
+    u_data_start = u_start_offset + 2
+    
+    # Find the next AES block boundary (Safe Injection Point)
+    injection_offset = math.ceil(u_data_start / 16) * 16
+    
+    # LEN_PADDING is the gap between the start of 'u' data and the injection point
+    # This is the "8 bytes" in your snippet, but calculated exactly.
+    LEN_PADDING = injection_offset - u_data_start
+    print(f"[+] Calculated LEN_PADDING: {LEN_PADDING} bytes")
+
+    # 4. Construct SK_ENC_MODIFIED
+    # Logic: SK_ENC[:-len(u)] + NODE_KEY_ENC + SK_ENC[...]
+    # We apply this at the injection_offset we found.
+    
+    # Prefix: Keep everything up to the injection point (preserves p, q, d, and u header)
+    payload = SK_ENC[:injection_offset]
+    
+    # Injection: Insert the encrypted Node Key
+    payload += NODE_KEY_ENC
+    
+    # Suffix: Keep the rest of SK_ENC (skipping the bytes we just replaced to maintain size)
+    # NODE_KEY_ENC is 16 bytes (1 block). We skip 1 block of the original.
+    payload += SK_ENC[injection_offset + 16:]
+    
+    SK_ENC_MODIFIED = payload
+
+    # 5. Prepare Oracle Trigger (SID = u * p)
+    # When parsed, the server sees u' = (header + padding + NODE_KEY + rest...)
+    # We want the result m' = u' * p
+    SID_target = u * p
+    SID_ENC_INT = pow(SID_target, e, N)
+    SID_ENC_HEX = long_to_bytes(SID_ENC_INT).hex()
+
+    print("[*] Sending malicious payload...")
+    io.sendline(json.dumps({"action": "wait_login"}).encode())
+    io.recvline()
+    print(io.recvline().decode()) # "Login attempt from Alice..."
+    
+    msg = {
+        "action": "send_challenge",
+        "SID_enc": SID_ENC_HEX,
+        "share_key_enc": SK_ENC_MODIFIED.hex(),
+        "master_key_enc": MASTER_KEY_ENC
+    }
+    io.sendline(json.dumps(msg).encode())
+    
+    # 6. Receive SID_R
+    resp_line = io.recvline().decode().strip()
+    response = json.loads(resp_line)
+    print(response)
+    
+    if "error" in response:
+        print(f"[-] SERVER ERROR: {response['error']}")
+        return
+
+    # 7. Recover u'
+    # Server response is truncated by 16 bytes. 
+    # We shift left by 128 bits to align the MSBs where our injection lives.
+    SID_R = bytes.fromhex(response['SID'])
+    u_prime = (bytes_to_long(SID_R) << 128) // p
+    u_prime_bytes = long_to_bytes(u_prime)
+    
+    print(f"[+] Recovered u_prime (len {len(u_prime_bytes)})")
+    
+    # 8. Extract NODE_KEY
+    # Logic: NODE_KEY = u'_bytes[LEN_PADDING : LEN_PADDING + len(NODE_KEY_ENC)]
+    try:
+        # Note: u_prime_bytes might be shorter than expected if MSBs are zero.
+        # We index based on the calculated padding.
+        
+        NODE_KEY = u_prime_bytes[LEN_PADDING : LEN_PADDING + 16]
+        print(f"[+] Extracted Node Key: {NODE_KEY.hex()}")
+
+        # 9. Decrypt File
+        from Crypto.Cipher import AES
+        from Crypto.Util.Padding import unpad
+        
+        cipher = AES.new(NODE_KEY, AES.MODE_ECB)
+        try:
+            pt = unpad(cipher.decrypt(FILE_ENC), 16)
+            print(f"\n[SUCCESS] FLAG: {pt.decode()}")
+        except ValueError:
+            print("[-] Padding error (Key might be slightly off). Raw decrypt:")
+            print(cipher.decrypt(FILE_ENC))
+
+    except Exception as e:
+        print(f"[-] Extraction failed: {e}")
+
+    io.close()
+
+if __name__ == "__main__":
+    solve()

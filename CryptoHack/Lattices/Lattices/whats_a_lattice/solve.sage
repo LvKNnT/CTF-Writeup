@@ -1,0 +1,5 @@
+m = matrix(SR, 3, 3, [[6, 2, -3], [5, 1, 4], [2, 7, 1]])
+d = m.det()
+vol = abs(d)
+print("Determinant:", d)
+print("Volume of the lattice:", vol)

@@ -1,0 +1,30 @@
+gen_private: size
+s = 10000
+ai = random[s + 1, 2 * s]
+b = [ai] * size
+s = s + sum(b)
+
+q = rand[2 * s, 32 * s]
+q = prime
+r = rand[s, q]
+
+condition:
+q > sum(b)
+gcd(q, r) = 1
+
+return: b, r, q
+
+gen_public: b
+a = r * b % q
+~ r * b = a + k * q
+~ r * b - k * q = a
+
+(1, b) * r + (0, q) * -k
+(r, a)
+
+encrypt: b
+ct = 0
+ct += (msg & i) * bi    
+
+decrypt: b, r, q
+ct = inverse(r, q) * ct % q

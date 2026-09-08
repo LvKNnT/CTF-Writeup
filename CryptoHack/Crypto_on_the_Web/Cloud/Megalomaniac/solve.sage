@@ -1,0 +1,160 @@
+#!/usr/bin/env sage
+from pwn import *
+from Crypto.Util.number import long_to_bytes, bytes_to_long
+from Crypto.Cipher import AES
+from Crypto.Util.Padding import pad
+import json
+import operator
+
+# ==========================================
+# CONFIGURATION
+# ==========================================
+HOST = 'socket.cryptohack.org' # Change this
+PORT = 13408       # Change this
+# ==========================================
+
+def get_process():
+    return remote(HOST, PORT)
+
+def solve():
+    io = get_process()
+
+    # 1. Receive Initial Crypto Material
+    print("[*] Receiving crypto material...")
+    io.recvuntil(b"New client is uploading crypto material...\n")
+    material_json = io.recvline().decode().strip()
+    material = json.loads(material_json)
+    
+    # Parse Public Key
+    N = int(material['share_key_pub'][0])
+    e = int(material['share_key_pub'][1])
+    
+    # Parse Encrypted Keys (Hex to Bytes)
+    master_key_enc = material['master_key_enc']
+    share_key_enc_bytes = bytes.fromhex(material['share_key_enc'])
+    
+    print(f"[+] Public Key (N) size: {N.bit_length()} bits")
+
+    # 2. Prepare the Fault Injection
+    # The private key format is: len(p) + p + len(q) + q ...
+    # p is 128 bytes + 2 bytes length = 130 bytes.
+    # AES block size is 16 bytes. 130 // 16 = 8.
+    # p occupies blocks 0 to 8. q starts inside block 8.
+    # To safely corrupt q without touching p, we corrupt block 10 (offset 160).
+    
+    faulty_share_key = bytearray(share_key_enc_bytes)
+    # Corrupt a byte in the middle of q's encryption
+    faulty_share_key[160] = operator.xor(faulty_share_key[160], 0xFF) 
+    faulty_share_key_hex = faulty_share_key.hex()
+
+    # 3. Create a Dummy SID (Plaintext)
+    # This is the "S" in the equation
+    dummy_sid = b"A" * 32 # Random known value
+    S = bytes_to_long(dummy_sid)
+    
+    # Encrypt SID with public key to get SID_enc
+    S_enc_int = pow(S, e, N)
+    SID_enc_hex = long_to_bytes(S_enc_int).hex()
+
+    # 4. Interact with Server
+    # Step A: Initiate Login
+    print("[*] Initiating login...")
+    io.sendline(json.dumps({"action": "wait_login"}).encode())
+    io.recvline() # "Login attempt from Alice..."
+    io.recvline() # "Login attempt from Alice..."
+    
+    # Step B: Send Challenge with Faulty Key
+    print("[*] Sending faulty payload...")
+    payload = {
+        "action": "send_challenge",
+        "SID_enc": SID_enc_hex,
+        "share_key_enc": faulty_share_key_hex,
+        "master_key_enc": master_key_enc
+    }
+    io.sendline(json.dumps(payload).encode())
+    
+    # Step C: Receive Truncated Faulty Decryption
+    response = json.loads(io.recvline().decode())
+    if "error" in response:
+        print(f"[-] Error: {response['error']}")
+        return
+
+    # This is the truncated S' (S_prime)
+    # The server did: SID[:-16]. 
+    # Since bytes_to_long is Big Endian, removing the last 16 bytes 
+    # means we lost the LEAST significant 128 bits.
+    truncated_s_prime_hex = response['SID']
+    truncated_s_prime = bytes_to_long(bytes.fromhex(truncated_s_prime_hex))
+    
+    print(f"[+] Received truncated faulty decryption: {truncated_s_prime}")
+
+    # 5. Coppersmith's Attack (SageMath)
+    # Relation: S' = S (mod p)
+    # S' = truncated_s_prime * 2^128 + x
+    # (truncated_s_prime * 2^128 + x) - S = 0 (mod p)
+    
+    print("[*] Running Coppersmith to recover missing bytes...")
+    
+    PR.<x> = PolynomialRing(Zmod(N))
+    
+    # 128 bits missing
+    missing_bits = 128
+    shift = 2**missing_bits
+    
+    # Construct polynomial: f(x) = (Known_High_Bits + x) - Real_S
+    f = (truncated_s_prime * shift + x) - S
+    
+    # Find small root mod p (p is a factor of N)
+    # We use beta=0.4 to assume p is approx N^0.4 or larger (it is N^0.5)
+    roots = f.small_roots(X=2**missing_bits, beta=0.4)
+    
+    if not roots:
+        print("[-] Coppersmith failed to find roots.")
+        return
+
+    recovered_x = roots[0]
+    print(f"[+] Recovered missing part: {recovered_x}")
+    
+    # Reconstruct full faulty S'
+    S_prime = truncated_s_prime * shift + recovered_x
+    
+    # 6. Recover p
+    # p = GCD(S' - S, N)
+    p = gcd(S_prime - S, N)
+    
+    if p == 1 or p == N:
+        print("[-] Failed to factor N.")
+        return
+        
+    print(f"[+] Successfully factored N!")
+    print(f"    p: {p}")
+    q = int(N) // int(p)
+    print(f"    q: {q}")
+
+    # 7. Decrypt the Flag
+    print("[*] Decrypting flag...")
+    
+    # Replicate the server's key derivation
+    from Crypto.Hash import SHA256
+    
+    # Get encrypted flag from server
+    io.sendline(json.dumps({"action": "get_encrypted_flag"}).encode())
+    flag_resp = json.loads(io.recvline().decode())
+    enc_flag = bytes.fromhex(flag_resp['encrypted_flag'])
+    
+    # Derive key
+    # Note: Ensure long_to_bytes matches the server's python version/lib
+    secret = SHA256.new(long_to_bytes(int(p)) + long_to_bytes(int(q))).digest()
+    
+    cipher = AES.new(secret, AES.MODE_ECB)
+    try:
+        flag = cipher.decrypt(enc_flag)
+        # Remove padding manually or check if it looks right
+        print(f"\n[SUCCESS] FLAG: {flag.decode(errors='ignore')}")
+    except Exception as e:
+        print(f"[-] Decryption error: {e}")
+
+    io.close()
+
+if __name__ == "__main__":
+    solve()

@@ -1,0 +1,54 @@
+# CryptoHack - Road to CSIDH - Special Isogenies
+# E0 : y^2 = x^3 + x  over F_p, p = 419 (supersingular, so #E0(F_p) = p + 1).
+# Take two different points of order 5, build the degree-5 isogeny each
+# generates, and compare the Montgomery A of the codomains.
+
+p = 419
+F = GF(p)
+E0 = EllipticCurve(F, [1, 0])
+
+assert E0.order() == p + 1   # supersingular over F_p: E(F_p) = Z/(p+1)
+
+
+def random_point_of_order(E, n):
+    m = E.order() // n
+    while True:
+        P = m * E.random_point()
+        if P != E(0):
+            return P
+
+
+def montgomery_A(E):
+    Emont = E.montgomery_model()
+    _, A, _, _, _ = Emont.a_invariants()
+    return A
+
+
+# First order-5 point and its isogeny
+P1 = random_point_of_order(E0, 5)
+assert P1.order() == 5
+phi1 = E0.isogeny(P1)
+E1 = phi1.codomain()
+A1 = montgomery_A(E1)
+print("P1 =", P1)
+print("codomain 1:", E1)
+print("j(E1) =", E1.j_invariant())
+print("Montgomery A (1st) =", A1)
+print()
+
+# Second, independently-chosen order-5 point and its isogeny
+P2 = random_point_of_order(E0, 5)
+assert P2.order() == 5
+phi2 = E0.isogeny(P2)
+E2 = phi2.codomain()
+A2 = montgomery_A(E2)
+print("P2 =", P2)
+print("codomain 2:", E2)
+print("j(E2) =", E2.j_invariant())
+print("Montgomery A (2nd) =", A2)
+print()
+
+# E0(F_p) is cyclic of order p+1, so it has a UNIQUE subgroup of order 5:
+# every order-5 point generates the same kernel, hence the same codomain.
+assert A1 == A2
+print("flag: A =", A1)

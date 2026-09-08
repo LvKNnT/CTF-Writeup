@@ -1,0 +1,21 @@
+ElGamal has this property:
+- beta = alpha ^ a mod p
+- private key : p, q
+- public key : p, alpha, beta
+- enc : (y1, y2) which y1 = alpha ^ k mod p, y2 = x * beta ^ k mod p
+
+in this chall:
+g is alpha
+public_key() is beta
+q is p
+
+enc: 
+    y = random k
+    s = beta ^ k mod p
+    c1 = alpha ^ k mod p
+    c2 = beta * m mod p
+
+in each bit m:
+    create a padding = seed ^ e mod q
+    let me = (padding << 1) + lsb
+    h = random public_key

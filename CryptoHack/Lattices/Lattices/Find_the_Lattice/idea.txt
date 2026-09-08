@@ -1,0 +1,28 @@
+gen_key:
+
+q = prime
+f = random[2, q // 2]
+g = random[q // 4, q // 2] | gcd(f, g) = 1
+h = inverse(f, q) * g % q
+  = f' * g % q
+-> f * h = g (mod q)
+-> f * h = g + k * q
+-> f * h - k * q = g
+~ v = x * (1, h) + y (0, q) = (x, x * h + y * q)
+~ x = f, y = - k
+-> v = (f, g)
+
+  
+pub: q, h 
+pri: f, g
+
+encrypt: q, h, m
+m < q // 2
+r = random[2, q // 2]
+e = r * h + m % q
+
+decrypt: q, h, f, g, e
+a = (f * e) % q
+m = a * inverse(f, g) % g
+
+Known: e, q, h

@@ -1,0 +1,57 @@
+# CryptoHack - Road to CSIDH - Prime Power Isogenies
+# E0 : y^2 = x^3 + x over F_419.  p + 1 = 420 = 2^2 * 3 * 5 * 7.
+#
+# Part 1 (exploration): build a degree 5^9 isogeny by repeatedly taking
+# degree-5 isogenies (point of order 5 -> codomain, e times) and compare
+# the final curve to E0.
+#
+# Part 2 (the actual question): repeatedly take 7-isogenies (always via
+# the unique F_p-rational point of order 7 on the current curve) starting
+# from E0, and count how many steps are needed before landing back on a
+# curve isomorphic to E0.
+
+p = 419
+F = GF(p)
+E0 = EllipticCurve(F, [1, 0])
+assert E0.order() == p + 1          # 420 = 2^2 * 3 * 5 * 7
+
+
+def order_ell_point(E, ell):
+    m = E.order() // ell
+    while True:
+        P = m * E.random_point()
+        if P != E(0):
+            return P
+
+
+def ell_isogeny_step(E, ell):
+    P = order_ell_point(E, ell)
+    assert P.order() == ell
+    return E.isogeny(P).codomain()
+
+
+# --- Part 1: degree 5^9 isogeny, e = 9 repeated 5-isogenies ---
+E = E0
+for _ in range(9):
+    E = ell_isogeny_step(E, 5)
+
+print("After a 5^9 isogeny:")
+print("  curve:", E)
+print("  j-invariant:", E.j_invariant())
+print("  isomorphic to E0?", E.is_isomorphic(E0))
+print()
+
+# --- Part 2: how many 7-isogeny steps to return to E0 ---
+# Note: two curves can share a j-invariant while being non-isomorphic
+# quadratic twists over F_p (and both can be trace-0 supersingular, i.e.
+# both live in this graph) - so compare with is_isomorphic, not just
+# j-invariant equality, or we might stop one step early on the twist.
+E = E0
+steps = 0
+while True:
+    E = ell_isogeny_step(E, 7)
+    steps += 1
+    if E.is_isomorphic(E0):
+        break
+
+print("Number of 7-isogenies to return to E0:", steps)
