@@ -1,0 +1,37 @@
+NULL0RIGIN WORKS              OPERATOR'S CARD              KEY SCHEDULE
+=======================================================================
+
+  Carry this. It is not reissued.
+
+  Every run on this line is keyed off the run before it. There is
+  no key book, there is no key of the day, and nobody is coming
+  to give you one. The seal you took off the last run IS the key
+  to this one. That is the whole of the discipline.
+
+  TO MAKE THE KEY
+
+      k = SHA-256 over the previous seal, exactly as it was
+          written, braces and all, nothing stripped, nothing
+          re-cased, no newline.
+
+  WHERE A RUN WANTS A NUMBER
+
+      the first four octets of k, high octet first.
+
+  WHERE A RUN WANTS A STREAM
+
+      SHA-256( k followed by a counter ), the counter counting up
+      from nought, four octets, high octet first; the digests
+      laid end to end and cut to the length you need.
+
+  A stream is laid against an entry by exclusive-or, octet for
+  octet, from the front.
+
+  Every run after the first is keyed this way and no run will say
+  so again. If a run does not come out, you have the wrong seal
+  from the run before, or you have the right seal and have typed
+  it wrong. There is no third case.
+
+  A seal that is one character out is not nearly right. It is a
+  different key and it will give you nothing at all, which is at
+  least honest of it.

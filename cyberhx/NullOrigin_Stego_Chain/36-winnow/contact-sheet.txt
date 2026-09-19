@@ -1,0 +1,41 @@
+SLEEVE 9 - CONTACT SHEET - 2048 FRAMES
+======================================
+
+  Sixty-four across, thirty-two down, read the way you read
+  anything: along the top row first.
+
+  They were shot IN PAIRS. Frame nought and frame one are a pair,
+  frame two and frame three are a pair, and so on to the end of
+  the sheet. Each frame of a pair carries one bit and the two
+  bits disagree, always, by design. One of the two is the truth
+  and the other was put there to be found.
+
+  Nothing in the picture tells you which. The pictures are all
+  real exposures and all worthless.
+
+  Every frame carries its own SEAL, and the seal is what sorts
+  them. A frame's seal is struck over the frame's own NUMBER and
+  the bit it carries, with the die from the run before this one -
+
+        seal = SHA-256( k, then the frame number as two octets
+               high first, then the one octet that is the bit )
+
+  and only the first two octets of that are kept, because two
+  octets is enough to sort a sheet and not so many that the sheet
+  looks written on.
+
+  k is what the card says it is.
+
+  Strike the seal yourself for both frames of a pair. One will
+  come out. Take that frame's bit and throw the other away. Do
+  that a thousand times and you have the run.
+
+  Read the sheet straight through without sorting it and you will
+  get something. You will get a great deal, in fact. All of it
+  was put there for the man who does not sort.
+
+  The whole of the trick is that the chaff is not disguised. It
+  is not hidden, it is not weak, it is not badly made. It is
+  perfectly good chaff and there is more of it than there is
+  grain, and without the die there is no reading on this earth
+  that will separate them.

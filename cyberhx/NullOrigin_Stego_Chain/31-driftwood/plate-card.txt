@@ -1,0 +1,38 @@
+NULL0RIGIN ARCHIVE            PLATE ROOM            INDEX CARD
+===============================================================
+
+  SLEEVE      4
+  PLATE       driftwood
+  SUBJECT     winding gear, no 3 shaft, from the yard
+  CONDITION   water damaged. emulsion lifting at the corner.
+
+  NOTE FROM THE KEEPER
+  -------------------------------------------------------------
+  Read this once, and then read nothing else in this room until
+  you have understood it.
+
+  The plate room does not write on plates. When the plate room
+  puts something INTO a plate it goes in as a WORKS ENTRY, and a
+  works entry is always the same shape:
+
+        PL8     the works stamp, three characters
+        .       one character, the issue of the stamp
+        ..      the length of the entry, two characters, low first
+        ....    a check over the entry, four characters, low first
+        ....    the entry itself
+
+  The check is the ordinary one. Any clerk can run it.
+
+  If you have pulled something out of a plate and it does not
+  begin with the stamp, and the check over it does not come out,
+  then it is not a works entry. It is somebody's handwriting.
+
+  This room is full of handwriting. None of it is worth the paper
+  and some of it was left to be found.
+
+  There is nothing on this board that will tell you whether an
+  answer is right. The stamp and the check are the only two
+  things that ever will. Learn to trust them and you will not
+  waste a week.
+
+  The keeper, 11th of the month
