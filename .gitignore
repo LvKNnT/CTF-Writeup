@@ -1,0 +1,36 @@
+# Python and SageMath generated files
+__pycache__/
+*.py[cod]
+*.sage.py
+.ipynb_checkpoints/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# Local virtual environments and configuration
+.venv/
+venv/
+.env
+.env.*
+!.env.example
+!.env.sample
+
+# Editor and operating-system clutter
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db
+Desktop.ini
+
+# Download caches
+.cache/huggingface/
+
+# Large local CSCV artifacts; retain model metadata and challenge fixtures.
+/CSCV2026/crypto/residuegate/qwen3vl2b/*.safetensors
+/CSCV2026/crypto/residuegate/local-server/residuegate-hard
+
+# Do not globally ignore binaries, archives, logs, or output files:
+# they can be original challenge inputs or evidence for a writeup.
