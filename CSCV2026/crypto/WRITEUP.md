@@ -143,6 +143,8 @@ CSCV2026{ch1m3r4_h1dd3n_m0dulus_th3n_b1453d_k3yg3n_2026}
 
 ## Residuegate
 
+> I did not complete it during contest. I asked the method from `@Noah` after the contest.
+
 ### Summary
 
 Residuegate is an image-classification challenge with a weak encrypted linear head and a six-image commitment. The solver recovers the head, evaluates all 16 allowed variants for each of six image slots, finds the committed tuple, and submits those images.
